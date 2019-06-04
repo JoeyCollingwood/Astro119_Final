@@ -13,9 +13,7 @@ star_data = 'hygdata_v3.csv'
 
 #===========================LOAD DATA================================
 os.chdir(data_dir)
-
 stars = np.loadtxt(star_data).T
-
 
 #===========================PLOTTING=================================
 plt.figure(1)
