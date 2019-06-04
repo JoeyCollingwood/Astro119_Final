@@ -18,3 +18,5 @@ stars = np.loadtxt(star_data).T
 
 
 #===========================PLOTTING=================================
+plt.figure(1)
+ax = plt.subplot(111)
