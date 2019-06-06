@@ -1,33 +1,48 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Sun Jun  2 22:19:17 2019
+Created on Thu Jun  6 13:18:52 2019
 
 @author: lukewaldschmidt
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 #from mpl_toolkits.mplot3d import Axes3D
 
 file_in = 'data/hygdata_v3.csv'
-mData = np.genfromtxt(file_in, delimiter = ',',skip_header = 1, usecols=[6,9,12,14,16,17,18,19,33]
+df = pd.read_csv(file_in)
+mData = np.genfromtxt(file_in, dtype=None, delimiter = ',',skip_header = 1, usecols=[9,12,16,33]
                       ).T
-name   = mData[0]
-dist   = mData[1]
-radvel = mData[2]
-absmag = mData[3]
-color  = mData[4]
-xpos   = mData[5]
-ypos   = mData[6]
-zpos   = mData[7]
-lumin  = mData[8]
+
+median = df['ci'].median()
+df['ci'].fillna(method='backfill', inplace=True)
+#print(df.isnull().sum()['ci'])
+
+ci = df[['ci']].values  #using pandas to replace NaN values in ci column, then replacing them with backfilled values
+dist   = mData[0]
+radvel = mData[1]
+#ci  = mData[2]
+lumin  = mData[3]
 
 t_sun = 5800
+l_sun = 3.85 * 10**26
+temp    = []
+radius  = []
+lum_new = []
+for i in range (len(ci)):
+    
+    t = 4600*((1/(.92*ci[i]+1.7))+1/(.92*ci[i]+.62))
+    r = np.sqrt(((lumin[i]) * (l_sun)) /(4*np.pi*(5.67*(10**(-27))*t**4)))
+    temp.append(t/t_sun)
+    radius.append(r)
+    lum_new.append(lumin[i])
 
-
-def temp(color):
-    return 4600 * ((1/((.92*color)+1.7))+(1/((.92*color)+0.62)))
+#def temp(ci):
+#    return 4600 * ((1/((.92*ci)+1.7))+(1/((.92*ci)+0.62)))
+#def radius(lumin):
+#    return np.sqrt(((lumin) * (l_sun)) /(4*np.pi*(5.67*(10**(-27))*temp(ci)**4)))
 
 def lin_LS( aX, aY):
     """
@@ -48,26 +63,18 @@ def lin_LS( aX, aY):
     a     = meanY - meanX*slope
     return slope, a
 
-a_x = np.log10(temp(color)/t_sun)
-a_y = np.log10(lumin) 
-xmin = -1
-xmax = 1  
-slope, f_a = lin_LS( np.log10(temp(color)), np.log10(lumin) )
-# extent fitting range by half order mag on both sides
-aX_fit = np.linspace( xmin*.5, xmax*5, 100)
-aPLfit = 10**(f_a)*aX_fit**slope
+
+log_lum  = np.log10(lumin)            #log luminosity in solar units
+log_temp = np.log10(temp)   #log temperature in solar units
+
+slope,f_a = lin_LS(log_lum[0:1000],log_temp[0:1000])
+#R_fit = np.linspace(np.median(radius)-1e10,np.median(radius)+1e10,100)
+aPLfit = 10**(f_a)*temp[::]**slope
 print(slope)
+#print(aPLfit)
 
-
-#==============================================================
-#                  plotting
-#==============================================================
-
-plt.figure(1)
-ax1 = plt.subplot(211)
-ax2 = plt.subplot(212)
-ax1.scatter(a_x,a_y,s=.05,c = 'b')
+fig1 = plt.figure(1)
+plt.scatter(log_temp,log_lum,s=.05,c = 'b')
 plt.gca().invert_xaxis()
-#ax2.loglog(temp(color),lumin)
-ax2.loglog(aX_fit,aPLfit,c = 'r')
-plt.show()
+fig2 = plt.figure(2)
+plt.loglog(temp,aPLfit,c = 'r')
