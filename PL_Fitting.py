@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-
 def lin_LS( aX, aY):
     """
     - linear least squares assuming normal distributed errors in Y, no errors in X
@@ -70,15 +69,15 @@ lum_choice  = [lum_new]
 temp_ms = np.select(temp_cond,temp_choice)
 lum_ms  = np.select(lum_cond,lum_choice)
 
+lum_ms_new=[]
+temp_ms_new=[]
+for i in range(len(temp_ms)):
+    if np.log10(lum_ms[i]) < 15*np.log10(temp_ms[i]) + 1.3:
+        lum_ms_new.append(lum_ms[i])
+        temp_ms_new.append(temp_ms[i])
+    i+=1
+        
 
-                                              
+plt.scatter(np.log10(temp_ms_new),np.log10(lum_ms_new),s=0.05)
 
-#print(temp_ms)
-#print(lum_ms)
-#slope, f_a = lin_LS( np.log10( temp_ms), np.log10( lum_ms))
-# extent fitting range by half order mag on both sides
-#aX_fit = np.linspace( -0.6, 0.6, 100)
-#aPLfit = 10**(f_a)*aX_fit**slope
-
-plt.scatter(np.log10(temp_ms),np.log10(lum_ms),s=0.05)
 plt.show()
