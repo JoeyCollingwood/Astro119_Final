@@ -8,7 +8,7 @@ Created on Sat Jun  8 10:46:14 2019
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import scipy.stats
+#import scipy.stats
 
 
 
@@ -72,9 +72,9 @@ lum_ms = np.ones(10000)
 #lum_select  = np.select(lum_cond,lum_new)
 
 for i in range(len(temp_ms)):
-    if np.log10(temp[i]) > -0.3 and np.log10(temp[i]) < 4:
+    if np.log10(temp[i]) > -0.2 and np.log10(temp[i]) < 0.4:
         temp_ms[i] = temp[i]
-    if np.log10(lum_new[i]) < 3:
+    if np.log10(lum_new[i]) > -1 and np.log10(lum_new[i]) < 1:
         lum_ms[i] = lum_new[i]
 
 #print(temp_ms)
