@@ -63,20 +63,26 @@ for i in range (len(ci)):
 temp_cond = [np.log10(temp)>-0.3,np.log10(temp)<4]
 lum_cond  = [np.log10(lum_new)<3]
 
-temp_choice = [temp, temp]
-lum_choice  = [lum_new]
-temp_ms = np.select(temp_cond,temp_choice)
-lum_ms  = np.select(lum_cond,lum_choice)
+#temp_choice = [temp, temp]
+#lum_choice  = [lum_new]
 
+temp_ms = np.ones(10000)
+lum_ms = np.ones(10000)
+#temp_select = np.select(temp_cond,temp_ms)
+#lum_select  = np.select(lum_cond,lum_new)
+
+for i in range(len(temp_ms)):
+    if np.log10(temp[i]) > -0.3 and np.log10(temp[i]) < 4:
+        temp_ms[i] = temp[i]
+    if np.log10(lum_new[i]) < 3:
+        lum_ms[i] = lum_new[i]
 
 #print(temp_ms)
 #print(lum_ms)
-slope, f_a = lin_LS( temp_ms[0:10000], lum_ms[0:10000])
+slope, f_a = lin_LS( temp_ms, lum_ms)
 print('slope: ' + str(slope) + 'intercept: ' + str(f_a))
 a_x = np.linspace(-0.6,0.6,10000)
-y_pred = np.zeros(10000)
-for i in range(len(a_x)):
-    y_pred[i] = slope*a_x[i] + f_a
+y_Fit = slope*a_x + f_a
 
 # extent fitting range by half order mag on both sides
 #aX_fit = np.linspace( -0.6, 0.6, 100)
@@ -87,9 +93,9 @@ log_temp = np.log10(temp)
 
 fig1 = plt.figure(1)
 plt.scatter(log_temp,log_lum,s=.05,c = 'black')
+plt.plot(a_x, y_Fit, c = 'red')
 plt.gca().invert_xaxis()
 plt.title('Hertzsprung-Russell Diagram')
 plt.xlabel('Temperature')
 plt.ylabel('Luminosity')
 plt.grid(True, linestyle = 'dotted', c = 'black')
-plt.plot(a_x,y_pred,c='red')
