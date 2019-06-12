@@ -12,11 +12,12 @@ import matplotlib.patches as patches
 import pandas as pd
 #from mpl_toolkits.mplot3d import Axes3D
 
-file_in = 'data/hygdata_v3.csv'
+#================================reading in the data================================
+file_in = 'hygdata_v3.csv'
 df = pd.read_csv(file_in)
 mData = np.genfromtxt(file_in, dtype=None, delimiter = ',',skip_header = 1, usecols=[9,12,16,33]
                       ).T
-
+#===================filling in missing values======================================
 median = df['ci'].median()
 df['ci'].fillna(method='backfill', inplace=True)
 #print(df.isnull().sum()['ci'])
@@ -27,6 +28,7 @@ radvel = mData[1]
 #ci  = mData[2]
 lumin  = mData[3]
 
+#====================calculating temp/radius========================
 t_sun = 5800
 l_sun = 3.85 * 10**26
 temp    = []
@@ -40,6 +42,7 @@ for i in range (len(ci)):
     radius.append(r)
     lum_new.append(lumin[i])
 
+#===========================HR DIAGRAM=======================================================
 fig = plt.figure(figsize=(10,10))
 ax = plt.subplot(111)
 ax.scatter(np.log10(temp),np.log10(lum_new),s=.07,c = 'k')
@@ -72,3 +75,4 @@ ax.annotate(
 plt.legend()
 ax.set_title('H-R diagram',fontsize=19)
 plt.show()
+
