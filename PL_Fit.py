@@ -1,17 +1,9 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Jun  8 10:46:14 2019
-@author: lukewaldschmidt
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-#import scipy.stats
 
 
-
+#Least squares method used to fit the data
 def lin_LS( aX, aY):
     """
     - linear least squares assuming normal distributed errors in Y, no errors in X
@@ -29,7 +21,7 @@ def lin_LS( aX, aY):
     a     = meanY - meanX*slope
     return slope, a
 
-
+#Reads the data file and replaces NaN values
 file_in = 'hygdata_v3.csv'
 df = pd.read_csv(file_in)
 mData = np.genfromtxt(file_in, dtype=None, delimiter = ',',skip_header = 1, usecols=[9,12,16,17,18,19,33]
@@ -60,42 +52,38 @@ for i in range (len(ci)):
     radius.append(r)
     lum_new.append(lumin[i])
 
-temp_cond = [np.log10(temp)>-0.3,np.log10(temp)<4]
-lum_cond  = [np.log10(lum_new)<3]
+#Initializes arrays to fill with limited data
+temp_ms = np.ones(20000)
+lum_ms = np.ones(20000)
 
-#temp_choice = [temp, temp]
-#lum_choice  = [lum_new]
-
-temp_ms = np.ones(10000)
-lum_ms = np.ones(10000)
-#temp_select = np.select(temp_cond,temp_ms)
-#lum_select  = np.select(lum_cond,lum_new)
-
+#Limits the data to stars near the solar values
 for i in range(len(temp_ms)):
     if np.log10(temp[i]) > -0.2 and np.log10(temp[i]) < 0.4:
         temp_ms[i] = temp[i]
     if np.log10(lum_new[i]) > -1 and np.log10(lum_new[i]) < 1:
         lum_ms[i] = lum_new[i]
 
-#print(temp_ms)
-#print(lum_ms)
+#Determines the least sqaures fit for limited data
 slope, f_a = lin_LS( temp_ms, lum_ms)
 print('slope: ' + str(slope) + 'intercept: ' + str(f_a))
 a_x = np.linspace(-0.6,0.6,10000)
 y_Fit = slope*a_x + f_a
 
-# extent fitting range by half order mag on both sides
-#aX_fit = np.linspace( -0.6, 0.6, 100)
-#aPLfit = 10**(f_a)*aX_fit**slope
-
-log_lum  = np.log10(lumin)            #log luminosity in solar units
+#Log-transformed data in solar units
+log_lum  = np.log10(lumin)            
 log_temp = np.log10(temp)
 
+#Initializing a text box to display LS fit
+props = dict(boxstyle='round',facecolor='grey',alpha=0.5)
+txt = 'Y= ' + str(round(slope, 3)) + 'x + ' + str(round(f_a, 3))
+
+#PLOTTING
 fig1 = plt.figure(1)
 plt.scatter(log_temp,log_lum,s=.05,c = 'black')
 plt.plot(a_x, y_Fit, c = 'red')
 plt.gca().invert_xaxis()
-plt.title('Hertzsprung-Russell Diagram')
+plt.title('HR Diagram Least Squares Fit')
 plt.xlabel('Temperature')
 plt.ylabel('Luminosity')
+plt.text(-0.25,4.2,txt,bbox=props)
 plt.grid(True, linestyle = 'dotted', c = 'black')
